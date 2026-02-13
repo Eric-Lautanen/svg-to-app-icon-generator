@@ -42,13 +42,8 @@ This tool generates the exact folder structures and file names required by:
 
 ## 🚀 How to use
 
-### 1. Use the Live Demo
-Go to the **[Live Demo](https://your-username.github.io/svg-to-app-icon-generator/)**, drag your SVG onto the zone, select your platform, and download your ZIP.
-
-### 2. Run Locally
 Since this is a single-file application, you don't need Node.js or a local server.
-1. Clone the repo: `git clone https://github.com/your-username/svg-to-app-icon-generator.git`
-2. Open `svgconverter.html` in your browser.
+1. Download the index.html file and load it from your device.
 
 ## 🛠️ Tech Stack
 * **HTML5/CSS3:** Responsive dark-mode UI with Syne & JetBrains Mono fonts.
