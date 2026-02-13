@@ -24,31 +24,50 @@ Most icon generators require you to upload your files to a server, process them 
 
 This tool generates the exact folder structures and file names required by:
 
-### 🖥️ Desktop Apps
-* **Tauri (Rust):** Includes `icon.icns`, `icon.ico`, and all png sizes for `src-tauri/icons/`.
-* **Electron.js:** Standard build/assets for macOS and Windows.
-* **Flutter Desktop:** Windows, macOS, and Linux specific assets.
-* **Wails (Go) & Neutralino.js**.
+### 🖥️ Desktop Frameworks
+* **Tauri (Rust):** Full `src-tauri/icons/` suite including `.icns`, `.ico`, and PNGs.
+* **Electron.js:** Standard `build/` or `assets/` directory icons.
+* **Wails (Go):** Specialized `appicon.png` and desktop formats.
+* **Neutralino.js, NW.js, and Flutter Desktop.**
 
-### 🌐 Web & PWA
-* **Modern Web:** Favicons (`.ico`, `-16x16.png`, `-32x32.png`) and Open Graph images.
-* **PWA:** Complete manifest icons (48px to 512px).
-* **Browser Extensions:** Icons for Chrome and Firefox manifests.
+### 🌐 Web & Browser Extensions
+* **Web / PWA:** Favicons, Apple Touch Icons, and Open Graph (OG) images.
+* **PWA Manifest:** Complete icon set from 48px up to 512px for `manifest.json`.
+* **Extensions:** Formatted specifically for **Chrome**, **Firefox**, and **Safari** extension resources.
 
-### 📲 Mobile Development
-* **Android:** Full `mipmap` folder generation (mdpi to xxxhdpi) + Play Store assets.
-* **iOS / iPadOS:** `AppIcon.appiconset` structure including @2x and @3x scales.
-* **React Native, Expo, & Capacitor**.
+### 📲 Mobile & Wearables
+* **iOS / iPadOS:** Full `Assets.xcassets` structure with all @2x and @3x scales.
+* **Android:** Complete `mipmap` folder generation (mdpi to xxxhdpi).
+* **watchOS:** Apple Watch specific sizes and companion icons.
+* **Cross-Platform:** Native support for **React Native**, **Expo**, **Capacitor (Ionic)**, **Tauri Mobile (v2)**, and **Flutter Mobile**.
+
+### 🛠️ Developer Tools & Plugins
+* **VS Code Extensions:** `icon.png` and `@2x` retina variants.
+* **Raycast:** Extension icons optimized for light and dark modes.
+* **Figma Plugins:** Manifest-ready icons and high-resolution cover art.
+
+### 🎮 Game Engines & Stores
+* **Unity:** Multi-platform icon suite (16px to 1024px).
+* **Godot & Unreal Engine:** Boot splashes, desktop icons, and store assets.
+* **Steam Store:** Essential capsule images (Header, Main, Small) and Library assets.
+
+### 🤖 Bots & Social Apps
+* **Discord & Slack:** App/Bot profile icons and cover images.
+* **Telegram:** Mini App and Bot profile headers and pictures.
 
 ## 🚀 How to use
 
 Since this is a single-file application, you don't need Node.js or a local server.
-1. Download the index.html file and load it from your device.
+1. Download the `svgconverter.html` file.
+2. Open it in any modern web browser.
+3. Paste your SVG code or upload your file.
+4. Select your target platform and click **Generate**.
 
 ## 🛠️ Tech Stack
 * **HTML5/CSS3:** Responsive dark-mode UI with Syne & JetBrains Mono fonts.
-* **JSZip:** Handles client-side ZIP generation.
-* **Canvas API:** Handles high-fidelity image rendering and resizing.
+* **JSZip:** Handles client-side ZIP generation and folder structuring.
+* **Canvas API:** High-fidelity image rendering and resizing.
+* **Blob API:** Client-side binary file generation for `.ico` and `.icns`.
 
 ## 📄 License
 MIT License. Free to use for personal and commercial projects.
