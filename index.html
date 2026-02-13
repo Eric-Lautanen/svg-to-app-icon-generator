@@ -467,42 +467,62 @@
         <!-- Platform Selector -->
         <div class="platform-section">
             <div class="section-label">Target Platform</div>
-            <div class="platform-select-wrap">
-                <select id="platformSelect">
-                    <optgroup label="── Desktop Frameworks ──">
-                        <option value="tauri">Tauri (Rust)</option>
-                        <option value="electron">Electron.js</option>
-                        <option value="neutralino">Neutralino.js</option>
-                        <option value="nwjs">NW.js</option>
-                        <option value="flutter_desktop">Flutter Desktop</option>
-                        <option value="wails">Wails (Go)</option>
-                    </optgroup>
-                    <optgroup label="── Web ──">
-                        <option value="web" selected>Web / PWA (favicon + all sizes)</option>
-                        <option value="pwa">Progressive Web App (PWA manifest)</option>
-                    </optgroup>
-                    <optgroup label="── Mobile ──">
-                        <option value="android">Android (mipmap + play store)</option>
-                        <option value="ios">iOS / iPadOS (App Store)</option>
-                        <option value="flutter_mobile">Flutter Mobile</option>
-                        <option value="react_native">React Native</option>
-                        <option value="capacitor">Capacitor (Ionic)</option>
-                        <option value="expo">Expo (React Native)</option>
-                    </optgroup>
-                    <optgroup label="── OS Extensions / System ──">
-                        <option value="windows_store">Windows Store / MSIX</option>
-                        <option value="macos_app">macOS App Bundle (.icns)</option>
-                        <option value="linux_app">Linux App (Freedesktop / AppImage)</option>
-                        <option value="chrome_extension">Chrome Extension</option>
-                        <option value="firefox_extension">Firefox Extension</option>
-                    </optgroup>
-                    <optgroup label="── Game Engines ──">
-                        <option value="unity">Unity (all platforms)</option>
-                        <option value="godot">Godot Engine</option>
-                        <option value="unreal">Unreal Engine</option>
-                    </optgroup>
-                </select>
-            </div>
+                <div class="platform-select-wrap">
+                    <select id="platformSelect">
+                        <optgroup label="── Desktop Frameworks ──">
+                            <option value="tauri">Tauri (Rust)</option>
+                            <option value="electron">Electron.js</option>
+                            <option value="neutralino">Neutralino.js</option>
+                            <option value="nwjs">NW.js</option>
+                            <option value="flutter_desktop">Flutter Desktop</option>
+                            <option value="wails">Wails (Go)</option>
+                        </optgroup>
+
+                        <optgroup label="── Web & PWA ──">
+                            <option value="web" selected>Web / PWA (favicon + all sizes)</option>
+                            <option value="pwa">Progressive Web App (PWA manifest)</option>
+                        </optgroup>
+
+                        <optgroup label="── Mobile & Wearables ──">
+                            <option value="android">Android (mipmap + play store)</option>
+                            <option value="ios">iOS / iPadOS (App Store)</option>
+                            <option value="watchos">watchOS (Apple Watch)</option>
+                            <option value="flutter_mobile">Flutter Mobile</option>
+                            <option value="tauri_mobile">Tauri Mobile (v2)</option>
+                            <option value="react_native">React Native</option>
+                            <option value="capacitor">Capacitor (Ionic)</option>
+                            <option value="expo">Expo (React Native)</option>
+                        </optgroup>
+
+                        <optgroup label="── OS & Browser Extensions ──">
+                            <option value="windows_store">Windows Store / MSIX</option>
+                            <option value="macos_app">macOS App Bundle (.icns)</option>
+                            <option value="linux_app">Linux App (Freedesktop / AppImage)</option>
+                            <option value="chrome_extension">Chrome Extension</option>
+                            <option value="firefox_extension">Firefox Extension</option>
+                            <option value="safari_extension">Safari Extension</option>
+                        </optgroup>
+
+                        <optgroup label="── Dev Tools & Plugins ──">
+                            <option value="vscode_extension">VS Code Extension</option>
+                            <option value="raycast">Raycast Extension</option>
+                            <option value="figma_plugin">Figma Plugin</option>
+                        </optgroup>
+
+                        <optgroup label="── Game Engines & Stores ──">
+                            <option value="unity">Unity (all platforms)</option>
+                            <option value="godot">Godot Engine</option>
+                            <option value="unreal">Unreal Engine</option>
+                            <option value="steam">Steam Store</option>
+                        </optgroup>
+
+                        <optgroup label="── Bots & Social Apps ──">
+                            <option value="discord_app">Discord App / Bot</option>
+                            <option value="slack_app">Slack App</option>
+                            <option value="telegram_miniapp">Telegram Mini App</option>
+                        </optgroup>
+                    </select>
+                </div>
             <div class="platform-meta" id="platformMeta"></div>
         </div>
 
@@ -563,6 +583,7 @@
         // ── Platform definitions ─────────────────────────────────────────────
 
         const PLATFORMS = {
+            // --- Desktop & Cross-Platform Frameworks ---
             tauri: {
                 label: 'Tauri — place files in src-tauri/icons/',
                 files: [
@@ -653,6 +674,8 @@
                     { name: '512x512.png',   type: 'png', size: 512 },
                 ]
             },
+
+            // --- Web & PWA ---
             web: {
                 label: 'Web / PWA — place in project root and /public/',
                 files: [
@@ -684,6 +707,8 @@
                     { name: 'favicon.ico',   type: 'ico' },
                 ]
             },
+
+            // --- Mobile & Wearables ---
             android: {
                 label: 'Android — place in res/mipmap-* directories',
                 files: [
@@ -719,6 +744,21 @@
                     { name: 'Icon-1024.png',      type: 'png', size: 1024 },
                 ]
             },
+            watchos: {
+                label: 'watchOS — place in Assets.xcassets/AppIcon.appiconset/',
+                files: [
+                    { name: 'Icon-24@2x.png',    type: 'png', size: 48 },
+                    { name: 'Icon-27.5@2x.png',  type: 'png', size: 55 },
+                    { name: 'Icon-29@2x.png',    type: 'png', size: 58 },
+                    { name: 'Icon-29@3x.png',    type: 'png', size: 87 },
+                    { name: 'Icon-40@2x.png',    type: 'png', size: 80 },
+                    { name: 'Icon-44@2x.png',    type: 'png', size: 88 },
+                    { name: 'Icon-50@2x.png',    type: 'png', size: 100 },
+                    { name: 'Icon-86@2x.png',    type: 'png', size: 172 },
+                    { name: 'Icon-98@2x.png',    type: 'png', size: 196 },
+                    { name: 'Icon-1024.png',     type: 'png', size: 1024 },
+                ]
+            },
             flutter_mobile: {
                 label: 'Flutter Mobile — use flutter_launcher_icons package',
                 files: [
@@ -733,6 +773,14 @@
                     { name: 'ios/Icon-60@2x.png',          type: 'png', size: 120 },
                     { name: 'ios/Icon-60@3x.png',          type: 'png', size: 180 },
                     { name: 'ios/Icon-1024.png',            type: 'png', size: 1024 },
+                ]
+            },
+            tauri_mobile: {
+                label: 'Tauri Mobile (v2) — gen/android/ and gen/ios/',
+                files: [
+                    { name: 'ios-icon-1024.png',   type: 'png', size: 1024 },
+                    { name: 'android-ic_launcher_foreground.png', type: 'png', size: 432 },
+                    { name: 'android-ic_launcher_background.png', type: 'png', size: 432 },
                 ]
             },
             react_native: {
@@ -764,12 +812,14 @@
                 label: 'Expo — reference in app.json under "icon" and "splash"',
                 files: [
                     { name: 'icon.png',              type: 'png', size: 1024 },
-                    { name: 'adaptive-icon.png',      type: 'png', size: 1024 },
-                    { name: 'splash-icon.png',        type: 'png', size: 1284 },
-                    { name: 'favicon.png',            type: 'png', size: 32 },
-                    { name: 'notification-icon.png',  type: 'png', size: 96 },
+                    { name: 'adaptive-icon.png',       type: 'png', size: 1024 },
+                    { name: 'splash-icon.png',         type: 'png', size: 1284 },
+                    { name: 'favicon.png',             type: 'png', size: 32 },
+                    { name: 'notification-icon.png',   type: 'png', size: 96 },
                 ]
             },
+
+            // --- Desktop Store / OS Specific ---
             windows_store: {
                 label: 'Windows Store / MSIX — place in Assets/ folder',
                 files: [
@@ -790,9 +840,9 @@
                 files: [
                     { name: 'icon_16x16.png',      type: 'png', size: 16 },
                     { name: 'icon_16x16@2x.png',   type: 'png', size: 32 },
-                    { name: 'icon_32x32.png',       type: 'png', size: 32 },
+                    { name: 'icon_32x32.png',      type: 'png', size: 32 },
                     { name: 'icon_32x32@2x.png',   type: 'png', size: 64 },
-                    { name: 'icon_64x64.png',       type: 'png', size: 64 },
+                    { name: 'icon_64x64.png',      type: 'png', size: 64 },
                     { name: 'icon_128x128.png',     type: 'png', size: 128 },
                     { name: 'icon_128x128@2x.png', type: 'png', size: 256 },
                     { name: 'icon_256x256.png',     type: 'png', size: 256 },
@@ -816,6 +866,8 @@
                     { name: 'icon.png',              type: 'png', size: 512 },
                 ]
             },
+
+            // --- Browser Extensions ---
             chrome_extension: {
                 label: 'Chrome Extension — declare in manifest.json "icons" field',
                 files: [
@@ -837,6 +889,44 @@
                     { name: 'icon128.png', type: 'png', size: 128 },
                 ]
             },
+            safari_extension: {
+                label: 'Safari Extension — place in Resources/ directory',
+                files: [
+                    { name: 'Icon-16.png',       type: 'png', size: 16 },
+                    { name: 'Icon-32.png',       type: 'png', size: 32 },
+                    { name: 'Icon-48.png',       type: 'png', size: 48 },
+                    { name: 'Icon-64.png',       type: 'png', size: 64 },
+                    { name: 'Icon-96.png',       type: 'png', size: 96 },
+                    { name: 'Icon-128.png',      type: 'png', size: 128 },
+                    { name: 'Icon-256.png',      type: 'png', size: 256 },
+                    { name: 'Icon-512.png',      type: 'png', size: 512 },
+                ]
+            },
+
+            // --- Developer Tools & Plugins ---
+            vscode_extension: {
+                label: 'VS Code Extension — reference in package.json "icon"',
+                files: [
+                    { name: 'icon.png',          type: 'png', size: 128 },
+                    { name: 'icon@2x.png',       type: 'png', size: 256 },
+                ]
+            },
+            raycast: {
+                label: 'Raycast Extension — place in assets/ folder',
+                files: [
+                    { name: 'icon.png',           type: 'png', size: 512 }, // Must be 512x512
+                    { name: 'icon@dark.png',      type: 'png', size: 512 }, // Optional dark mode variant
+                ]
+            },
+            figma_plugin: {
+                label: 'Figma Plugin — reference in manifest.json',
+                files: [
+                    { name: 'icon-128.png',      type: 'png', size: 128 },
+                    { name: 'cover-1920.png',    type: 'png', size: 1920 }, // 1920x960 recommended
+                ]
+            },
+
+            // --- Game Engines & Stores ---
             unity: {
                 label: 'Unity — Project Settings > Player > Icon; place in Assets/Icons/',
                 files: [
@@ -873,6 +963,41 @@
                     { name: 'Icon32.png',    type: 'png', size: 32 },
                     { name: 'icon.ico',      type: 'ico' },
                     { name: 'icon.icns',     type: 'icns' },
+                ]
+            },
+            steam: {
+                label: 'Steam Store — Upload via Steamworks Partner site',
+                files: [
+                    { name: 'header_capsule.png', type: 'png', size: 460 }, // 460x215
+                    { name: 'small_capsule.png',  type: 'png', size: 231 }, // 231x87
+                    { name: 'main_capsule.png',   type: 'png', size: 616 }, // 616x353
+                    { name: 'library_hero.png',   type: 'png', size: 3840 }, // 3840x1240 (max)
+                    { name: 'library_logo.png',   type: 'png', size: 1280 }, // 1280x720 (max)
+                    { name: 'library_600x900.png',type: 'png', size: 600 }, // Vertical grid
+                    { name: 'client_icon.ico',    type: 'ico' },
+                ]
+            },
+
+            // --- Bots & Social Apps ---
+            discord_app: {
+                label: 'Discord App / Bot — Upload to Developer Portal',
+                files: [
+                    { name: 'app_icon.png',       type: 'png', size: 512 },
+                    { name: 'cover_image.png',    type: 'png', size: 320 }, // 320x180 (for bot profiles)
+                ]
+            },
+            slack_app: {
+                label: 'Slack App — Upload to App Manifest / Settings',
+                files: [
+                    { name: 'icon_512.png',       type: 'png', size: 512 },
+                    { name: 'icon_1024.png',      type: 'png', size: 1024 },
+                ]
+            },
+            telegram_miniapp: {
+                label: 'Telegram Mini App / Bot — via BotFather',
+                files: [
+                    { name: 'bot_pic.png',        type: 'png', size: 640 }, // 640x640 minimum
+                    { name: 'header_pic.png',     type: 'png', size: 1280 }, // 1280x720 (placeholder)
                 ]
             },
         };
