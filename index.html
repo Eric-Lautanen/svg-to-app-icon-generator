@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Icon Converter</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23111'/><polygon points='8,24 16,8 24,24' fill='none' stroke='%2300e5ff' stroke-width='2' stroke-linejoin='round'/><circle cx='16' cy='16' r='3' fill='%2300e5ff'/><line x1='8' y1='24' x2='24' y2='24' stroke='%2300e5ff' stroke-width='2'/></svg>">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap');
+
+        :root {
+            --bg: #0a0a0b;
+            --surface: #111114;
+            --surface2: #18181c;
+            --border: #2a2a30;
+            --accent: #00e5ff;
+            --accent2: #7c3aed;
+            --text: #e8e8ec;
+            --muted: #5a5a6a;
+            --danger: #ff4757;
+            --success: #00d68f;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Syne', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--mono);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: 
+                repeating-linear-gradient(0deg, transparent, transparent 39px, #ffffff04 39px, #ffffff04 40px),
+                repeating-linear-gradient(90deg, transparent, transparent 39px, #ffffff04 39px, #ffffff04 40px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 960px;
+        }
+
+        /* ── Header ── */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+
+        .logo-mark {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+        }
+
+        .header-text h1 {
+            font-family: var(--sans);
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text);
+        }
+
+        .header-text p {
+            font-size: 0.75rem;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .version-tag {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 3px 10px;
+            border-radius: 2px;
+            letter-spacing: 0.1em;
+            opacity: 0.7;
+        }
+
+        /* ── Platform Selector ── */
+        .platform-section {
+            margin-bottom: 28px;
+        }
+
+        .section-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .platform-select-wrap {
+            position: relative;
+        }
+
+        .platform-select-wrap::after {
+            content: '▾';
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            pointer-events: none;
+            font-size: 0.9rem;
+        }
+
+        select#platformSelect {
+            width: 100%;
+            appearance: none;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            padding: 12px 40px 12px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        select#platformSelect:focus { border-color: var(--accent); }
+
+        optgroup {
+            color: var(--muted);
+            font-size: 0.75rem;
+            background: var(--surface2);
+        }
+
+        option {
+            background: var(--surface);
+            color: var(--text);
+            padding: 8px;
+        }
+
+        .platform-meta {
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: var(--surface2);
+            border-left: 2px solid var(--accent);
+            border-radius: 0 4px 4px 0;
+            font-size: 0.75rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .platform-meta strong { color: var(--text); }
+
+        /* ── Upload Zone ── */
+        .upload-zone {
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 48px 40px;
+            text-align: center;
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .upload-zone:hover { border-color: var(--accent); }
+        .upload-zone.dragover { border-color: var(--accent); border-style: solid; background: var(--surface2); }
+
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            opacity: 0.4;
+        }
+
+        .upload-zone h2 {
+            font-family: var(--sans);
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .upload-zone p { font-size: 0.75rem; color: var(--muted); }
+
+        input[type=file] { display: none; }
+
+        /* ── Divider ── */
+        .or-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            color: var(--muted);
+        }
+        .or-divider::before, .or-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ── Paste Area ── */
+        .paste-area {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .paste-area h4 {
+            font-family: var(--sans);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        textarea#svgCodeInput {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--accent);
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea#svgCodeInput:focus { border-color: var(--accent); }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 11px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--mono);
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+            width: 100%;
+            margin-top: 12px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover { opacity: 0.85; }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 7px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover { background: var(--danger); color: #fff; }
+
+        .btn-zip {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 13px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--mono);
+            font-weight: 600;
+            font-size: 0.85rem;
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .btn-zip:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ── Progress ── */
+        .progress-bar { display: none; height: 2px; background: var(--border); margin: 20px 0; border-radius: 1px; overflow: hidden; }
+        .progress-bar.active { display: block; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0; transition: width 0.3s ease; }
+
+        /* ── Preview ── */
+        .preview-section { display: none; margin-top: 36px; }
+        .preview-section.active { display: block; animation: fadeUp 0.4s ease; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .preview-header h3 {
+            font-family: var(--sans);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            background: rgba(0,229,255,0.1);
+            color: var(--accent);
+            border: 1px solid rgba(0,229,255,0.3);
+            padding: 2px 8px;
+            border-radius: 2px;
+            letter-spacing: 0.05em;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .preview-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px 12px 12px;
+            text-align: center;
+            transition: border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .preview-item:hover { border-color: var(--accent); }
+
+        .preview-image-container {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .preview-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .file-icon { font-size: 2rem; }
+
+        .size-label {
+            font-size: 0.68rem;
+            color: var(--muted);
+            word-break: break-all;
+            line-height: 1.4;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-item button {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid rgba(0,229,255,0.3);
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .preview-item button:hover { background: rgba(0,229,255,0.1); border-color: var(--accent); }
+        .preview-item button:disabled { opacity: 0.4; cursor: wait; }
+
+        /* ── Footer ── */
+        footer {
+            margin-top: 60px;
+            font-size: 0.65rem;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <header>
+            <svg class="logo-mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="44" height="44" rx="8" fill="#111114"/>
+                <polygon points="11,33 22,11 33,33" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linejoin="round"/>
+                <circle cx="22" cy="22" r="4" fill="#00e5ff" opacity="0.9"/>
+                <line x1="11" y1="33" x2="33" y2="33" stroke="#00e5ff" stroke-width="2"/>
+                <circle cx="11" cy="33" r="1.5" fill="#00e5ff"/>
+                <circle cx="33" cy="33" r="1.5" fill="#00e5ff"/>
+                <circle cx="22" cy="11" r="1.5" fill="#00e5ff"/>
+            </svg>
+            <div class="header-text">
+                <h1>SVG Icon Converter</h1>
+                <p>Multi-platform export tool</p>
+            </div>
+            <span class="version-tag">v2.0</span>
+        </header>
+
+        <!-- Platform Selector -->
+        <div class="platform-section">
+            <div class="section-label">Target Platform</div>
+            <div class="platform-select-wrap">
+                <select id="platformSelect">
+                    <optgroup label="── Desktop Frameworks ──">
+                        <option value="tauri">Tauri (Rust)</option>
+                        <option value="electron">Electron.js</option>
+                        <option value="neutralino">Neutralino.js</option>
+                        <option value="nwjs">NW.js</option>
+                        <option value="flutter_desktop">Flutter Desktop</option>
+                        <option value="wails">Wails (Go)</option>
+                    </optgroup>
+                    <optgroup label="── Web ──">
+                        <option value="web" selected>Web / PWA (favicon + all sizes)</option>
+                        <option value="pwa">Progressive Web App (PWA manifest)</option>
+                    </optgroup>
+                    <optgroup label="── Mobile ──">
+                        <option value="android">Android (mipmap + play store)</option>
+                        <option value="ios">iOS / iPadOS (App Store)</option>
+                        <option value="flutter_mobile">Flutter Mobile</option>
+                        <option value="react_native">React Native</option>
+                        <option value="capacitor">Capacitor (Ionic)</option>
+                        <option value="expo">Expo (React Native)</option>
+                    </optgroup>
+                    <optgroup label="── OS Extensions / System ──">
+                        <option value="windows_store">Windows Store / MSIX</option>
+                        <option value="macos_app">macOS App Bundle (.icns)</option>
+                        <option value="linux_app">Linux App (Freedesktop / AppImage)</option>
+                        <option value="chrome_extension">Chrome Extension</option>
+                        <option value="firefox_extension">Firefox Extension</option>
+                    </optgroup>
+                    <optgroup label="── Game Engines ──">
+                        <option value="unity">Unity (all platforms)</option>
+                        <option value="godot">Godot Engine</option>
+                        <option value="unreal">Unreal Engine</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="platform-meta" id="platformMeta"></div>
+        </div>
+
+        <!-- Upload -->
+        <div class="upload-zone" id="uploadZone">
+            <svg class="upload-icon" viewBox="0 0 48 48" fill="none">
+                <path d="M24 32V16M24 16l-7 7M24 16l7 7" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 36v4h32v-4" stroke="#5a5a6a" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <h2>Drop SVG file here</h2>
+            <p>or click to browse</p>
+            <input type="file" id="fileInput" accept=".svg,image/svg+xml">
+        </div>
+
+        <div class="or-divider">OR</div>
+
+        <div class="paste-area">
+            <h4>Paste SVG Code</h4>
+            <textarea id="svgCodeInput" placeholder="<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; ..."></textarea>
+            <button class="btn-primary" id="processSvgBtn">Process SVG</button>
+        </div>
+
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <div class="preview-header">
+                <h3>Output Files <span class="badge" id="iconCount">0 files</span></h3>
+                <button class="btn-danger" id="clearBtn">✕ Clear</button>
+            </div>
+            <div class="preview-grid" id="previewGrid"></div>
+            <button class="btn-zip" id="downloadAllBtn">
+                <span>⬇</span><span>Download All as ZIP</span>
+            </button>
+        </div>
+
+    </div>
+
+    <footer>SVG Icon Converter &nbsp;·&nbsp; runs entirely in your browser &nbsp;·&nbsp; no uploads</footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        // ── Platform definitions ─────────────────────────────────────────────
+
+        const PLATFORMS = {
+            tauri: {
+                label: 'Tauri — place files in src-tauri/icons/',
+                files: [
+                    { name: '32x32.png',        type: 'png', size: 32 },
+                    { name: '128x128.png',       type: 'png', size: 128 },
+                    { name: '128x128@2x.png',    type: 'png', size: 256 },
+                    { name: '1024x1024.png',     type: 'png', size: 1024 },
+                    { name: 'icon.icns',         type: 'icns' },
+                    { name: 'icon.ico',          type: 'ico' },
+                    { name: 'icon.png',          type: 'png', size: 1024 },
+                    { name: 'Square30x30Logo.png',   type: 'png', size: 30 },
+                    { name: 'Square44x44Logo.png',   type: 'png', size: 44 },
+                    { name: 'Square71x71Logo.png',   type: 'png', size: 71 },
+                    { name: 'Square89x89Logo.png',   type: 'png', size: 89 },
+                    { name: 'Square107x107Logo.png', type: 'png', size: 107 },
+                    { name: 'Square142x142Logo.png', type: 'png', size: 142 },
+                    { name: 'Square150x150Logo.png', type: 'png', size: 150 },
+                    { name: 'Square284x284Logo.png', type: 'png', size: 284 },
+                    { name: 'Square310x310Logo.png', type: 'png', size: 310 },
+                    { name: 'StoreLogo.png',         type: 'png', size: 50 },
+                ]
+            },
+            electron: {
+                label: 'Electron — place in build/ or assets/ directory',
+                files: [
+                    { name: 'icon.icns',     type: 'icns' },
+                    { name: 'icon.ico',      type: 'ico' },
+                    { name: 'icon.png',      type: 'png', size: 512 },
+                    { name: 'icon@2x.png',   type: 'png', size: 1024 },
+                    { name: '16x16.png',     type: 'png', size: 16 },
+                    { name: '32x32.png',     type: 'png', size: 32 },
+                    { name: '48x48.png',     type: 'png', size: 48 },
+                    { name: '64x64.png',     type: 'png', size: 64 },
+                    { name: '128x128.png',   type: 'png', size: 128 },
+                    { name: '256x256.png',   type: 'png', size: 256 },
+                    { name: '512x512.png',   type: 'png', size: 512 },
+                    { name: '1024x1024.png', type: 'png', size: 1024 },
+                ]
+            },
+            neutralino: {
+                label: 'Neutralino.js — place in /resources/icons/',
+                files: [
+                    { name: 'appIcon.png',   type: 'png', size: 512 },
+                    { name: 'trayIcon.png',  type: 'png', size: 20 },
+                    { name: 'icon.ico',      type: 'ico' },
+                    { name: 'icon.icns',     type: 'icns' },
+                    { name: '48x48.png',     type: 'png', size: 48 },
+                    { name: '128x128.png',   type: 'png', size: 128 },
+                    { name: '256x256.png',   type: 'png', size: 256 },
+                ]
+            },
+            nwjs: {
+                label: 'NW.js — reference in package.json window.icon',
+                files: [
+                    { name: 'icon.png',    type: 'png', size: 512 },
+                    { name: 'icon.ico',    type: 'ico' },
+                    { name: 'icon.icns',   type: 'icns' },
+                    { name: '16x16.png',   type: 'png', size: 16 },
+                    { name: '32x32.png',   type: 'png', size: 32 },
+                    { name: '64x64.png',   type: 'png', size: 64 },
+                    { name: '128x128.png', type: 'png', size: 128 },
+                    { name: '256x256.png', type: 'png', size: 256 },
+                    { name: '512x512.png', type: 'png', size: 512 },
+                ]
+            },
+            flutter_desktop: {
+                label: 'Flutter Desktop — windows/runner/resources/, macos/Runner/Assets.xcassets, linux/',
+                files: [
+                    { name: 'app_icon.png',      type: 'png', size: 1024 },
+                    { name: 'app_icon_16.png',   type: 'png', size: 16 },
+                    { name: 'app_icon_32.png',   type: 'png', size: 32 },
+                    { name: 'app_icon_48.png',   type: 'png', size: 48 },
+                    { name: 'app_icon_64.png',   type: 'png', size: 64 },
+                    { name: 'app_icon_128.png',  type: 'png', size: 128 },
+                    { name: 'app_icon_256.png',  type: 'png', size: 256 },
+                    { name: 'app_icon_512.png',  type: 'png', size: 512 },
+                    { name: 'icon.ico',          type: 'ico' },
+                    { name: 'icon.icns',         type: 'icns' },
+                ]
+            },
+            wails: {
+                label: 'Wails (Go) — place in build/appicon.png',
+                files: [
+                    { name: 'appicon.png',   type: 'png', size: 1024 },
+                    { name: 'icon.ico',      type: 'ico' },
+                    { name: 'icon.icns',     type: 'icns' },
+                    { name: '256x256.png',   type: 'png', size: 256 },
+                    { name: '512x512.png',   type: 'png', size: 512 },
+                ]
+            },
+            web: {
+                label: 'Web / PWA — place in project root and /public/',
+                files: [
+                    { name: 'favicon.ico',          type: 'ico' },
+                    { name: 'favicon-16x16.png',    type: 'png', size: 16 },
+                    { name: 'favicon-32x32.png',    type: 'png', size: 32 },
+                    { name: 'favicon-48x48.png',    type: 'png', size: 48 },
+                    { name: 'apple-touch-icon.png', type: 'png', size: 180 },
+                    { name: 'icon-192.png',         type: 'png', size: 192 },
+                    { name: 'icon-512.png',         type: 'png', size: 512 },
+                    { name: 'og-image.png',         type: 'png', size: 1200 },
+                    { name: 'ms-tile-150.png',      type: 'png', size: 150 },
+                    { name: 'ms-tile-310.png',      type: 'png', size: 310 },
+                ]
+            },
+            pwa: {
+                label: 'PWA manifest icons — include all in manifest.json',
+                files: [
+                    { name: 'icon-48.png',   type: 'png', size: 48 },
+                    { name: 'icon-72.png',   type: 'png', size: 72 },
+                    { name: 'icon-96.png',   type: 'png', size: 96 },
+                    { name: 'icon-128.png',  type: 'png', size: 128 },
+                    { name: 'icon-144.png',  type: 'png', size: 144 },
+                    { name: 'icon-152.png',  type: 'png', size: 152 },
+                    { name: 'icon-192.png',  type: 'png', size: 192 },
+                    { name: 'icon-256.png',  type: 'png', size: 256 },
+                    { name: 'icon-384.png',  type: 'png', size: 384 },
+                    { name: 'icon-512.png',  type: 'png', size: 512 },
+                    { name: 'favicon.ico',   type: 'ico' },
+                ]
+            },
+            android: {
+                label: 'Android — place in res/mipmap-* directories',
+                files: [
+                    { name: 'mipmap-mdpi/ic_launcher.png',    type: 'png', size: 48 },
+                    { name: 'mipmap-hdpi/ic_launcher.png',    type: 'png', size: 72 },
+                    { name: 'mipmap-xhdpi/ic_launcher.png',   type: 'png', size: 96 },
+                    { name: 'mipmap-xxhdpi/ic_launcher.png',  type: 'png', size: 144 },
+                    { name: 'mipmap-xxxhdpi/ic_launcher.png', type: 'png', size: 192 },
+                    { name: 'ic_launcher_round_48.png',       type: 'png', size: 48 },
+                    { name: 'ic_launcher_round_96.png',       type: 'png', size: 96 },
+                    { name: 'ic_launcher_round_192.png',      type: 'png', size: 192 },
+                    { name: 'play_store_512.png',             type: 'png', size: 512 },
+                    { name: 'notification_icon_24.png',       type: 'png', size: 24 },
+                ]
+            },
+            ios: {
+                label: 'iOS — place in Assets.xcassets/AppIcon.appiconset/',
+                files: [
+                    { name: 'Icon-20@1x.png',    type: 'png', size: 20 },
+                    { name: 'Icon-20@2x.png',    type: 'png', size: 40 },
+                    { name: 'Icon-20@3x.png',    type: 'png', size: 60 },
+                    { name: 'Icon-29@1x.png',    type: 'png', size: 29 },
+                    { name: 'Icon-29@2x.png',    type: 'png', size: 58 },
+                    { name: 'Icon-29@3x.png',    type: 'png', size: 87 },
+                    { name: 'Icon-40@1x.png',    type: 'png', size: 40 },
+                    { name: 'Icon-40@2x.png',    type: 'png', size: 80 },
+                    { name: 'Icon-40@3x.png',    type: 'png', size: 120 },
+                    { name: 'Icon-60@2x.png',    type: 'png', size: 120 },
+                    { name: 'Icon-60@3x.png',    type: 'png', size: 180 },
+                    { name: 'Icon-76@1x.png',    type: 'png', size: 76 },
+                    { name: 'Icon-76@2x.png',    type: 'png', size: 152 },
+                    { name: 'Icon-83.5@2x.png',  type: 'png', size: 167 },
+                    { name: 'Icon-1024.png',      type: 'png', size: 1024 },
+                ]
+            },
+            flutter_mobile: {
+                label: 'Flutter Mobile — use flutter_launcher_icons package',
+                files: [
+                    { name: 'launcher_icon.png',         type: 'png', size: 1024 },
+                    { name: 'android/ic_launcher_48.png',  type: 'png', size: 48 },
+                    { name: 'android/ic_launcher_72.png',  type: 'png', size: 72 },
+                    { name: 'android/ic_launcher_96.png',  type: 'png', size: 96 },
+                    { name: 'android/ic_launcher_144.png', type: 'png', size: 144 },
+                    { name: 'android/ic_launcher_192.png', type: 'png', size: 192 },
+                    { name: 'ios/Icon-20@1x.png',          type: 'png', size: 20 },
+                    { name: 'ios/Icon-40@2x.png',          type: 'png', size: 80 },
+                    { name: 'ios/Icon-60@2x.png',          type: 'png', size: 120 },
+                    { name: 'ios/Icon-60@3x.png',          type: 'png', size: 180 },
+                    { name: 'ios/Icon-1024.png',            type: 'png', size: 1024 },
+                ]
+            },
+            react_native: {
+                label: 'React Native — android/app/src/main/res/ and ios/AppName/Images.xcassets/',
+                files: [
+                    { name: 'mipmap-mdpi/ic_launcher.png',    type: 'png', size: 48 },
+                    { name: 'mipmap-hdpi/ic_launcher.png',    type: 'png', size: 72 },
+                    { name: 'mipmap-xhdpi/ic_launcher.png',   type: 'png', size: 96 },
+                    { name: 'mipmap-xxhdpi/ic_launcher.png',  type: 'png', size: 144 },
+                    { name: 'mipmap-xxxhdpi/ic_launcher.png', type: 'png', size: 192 },
+                    { name: 'ios/Icon-60@2x.png',  type: 'png', size: 120 },
+                    { name: 'ios/Icon-60@3x.png',  type: 'png', size: 180 },
+                    { name: 'ios/Icon-1024.png',    type: 'png', size: 1024 },
+                ]
+            },
+            capacitor: {
+                label: 'Capacitor (Ionic) — run npx capacitor-assets generate after placing icon.png',
+                files: [
+                    { name: 'icon.png',          type: 'png', size: 1024 },
+                    { name: 'icon-only.png',      type: 'png', size: 1024 },
+                    { name: 'icon-foreground.png',type: 'png', size: 1024 },
+                    { name: 'splash.png',         type: 'png', size: 2732 },
+                    { name: 'favicon-16.png',     type: 'png', size: 16 },
+                    { name: 'favicon-32.png',     type: 'png', size: 32 },
+                    { name: 'favicon.ico',        type: 'ico' },
+                ]
+            },
+            expo: {
+                label: 'Expo — reference in app.json under "icon" and "splash"',
+                files: [
+                    { name: 'icon.png',              type: 'png', size: 1024 },
+                    { name: 'adaptive-icon.png',      type: 'png', size: 1024 },
+                    { name: 'splash-icon.png',        type: 'png', size: 1284 },
+                    { name: 'favicon.png',            type: 'png', size: 32 },
+                    { name: 'notification-icon.png',  type: 'png', size: 96 },
+                ]
+            },
+            windows_store: {
+                label: 'Windows Store / MSIX — place in Assets/ folder',
+                files: [
+                    { name: 'Square44x44Logo.png',        type: 'png', size: 44 },
+                    { name: 'Square44x44Logo.scale-200.png', type: 'png', size: 88 },
+                    { name: 'Square71x71Logo.png',        type: 'png', size: 71 },
+                    { name: 'Square150x150Logo.png',      type: 'png', size: 150 },
+                    { name: 'Square150x150Logo.scale-200.png', type: 'png', size: 300 },
+                    { name: 'Square284x284Logo.png',      type: 'png', size: 284 },
+                    { name: 'Square310x310Logo.png',      type: 'png', size: 310 },
+                    { name: 'StoreLogo.png',              type: 'png', size: 50 },
+                    { name: 'StoreLogo.scale-200.png',    type: 'png', size: 100 },
+                    { name: 'icon.ico',                   type: 'ico' },
+                ]
+            },
+            macos_app: {
+                label: 'macOS App Bundle — add to Assets.xcassets/AppIcon.appiconset/',
+                files: [
+                    { name: 'icon_16x16.png',      type: 'png', size: 16 },
+                    { name: 'icon_16x16@2x.png',   type: 'png', size: 32 },
+                    { name: 'icon_32x32.png',       type: 'png', size: 32 },
+                    { name: 'icon_32x32@2x.png',   type: 'png', size: 64 },
+                    { name: 'icon_64x64.png',       type: 'png', size: 64 },
+                    { name: 'icon_128x128.png',     type: 'png', size: 128 },
+                    { name: 'icon_128x128@2x.png', type: 'png', size: 256 },
+                    { name: 'icon_256x256.png',     type: 'png', size: 256 },
+                    { name: 'icon_256x256@2x.png', type: 'png', size: 512 },
+                    { name: 'icon_512x512.png',     type: 'png', size: 512 },
+                    { name: 'icon_512x512@2x.png', type: 'png', size: 1024 },
+                    { name: 'icon.icns',            type: 'icns' },
+                ]
+            },
+            linux_app: {
+                label: 'Linux — /usr/share/icons/hicolor/ or AppImage resources/',
+                files: [
+                    { name: '16x16/apps/icon.png',   type: 'png', size: 16 },
+                    { name: '24x24/apps/icon.png',   type: 'png', size: 24 },
+                    { name: '32x32/apps/icon.png',   type: 'png', size: 32 },
+                    { name: '48x48/apps/icon.png',   type: 'png', size: 48 },
+                    { name: '64x64/apps/icon.png',   type: 'png', size: 64 },
+                    { name: '128x128/apps/icon.png', type: 'png', size: 128 },
+                    { name: '256x256/apps/icon.png', type: 'png', size: 256 },
+                    { name: '512x512/apps/icon.png', type: 'png', size: 512 },
+                    { name: 'icon.png',              type: 'png', size: 512 },
+                ]
+            },
+            chrome_extension: {
+                label: 'Chrome Extension — declare in manifest.json "icons" field',
+                files: [
+                    { name: 'icon16.png',  type: 'png', size: 16 },
+                    { name: 'icon32.png',  type: 'png', size: 32 },
+                    { name: 'icon48.png',  type: 'png', size: 48 },
+                    { name: 'icon64.png',  type: 'png', size: 64 },
+                    { name: 'icon128.png', type: 'png', size: 128 },
+                    { name: 'icon256.png', type: 'png', size: 256 },
+                ]
+            },
+            firefox_extension: {
+                label: 'Firefox Extension — declare in manifest.json "icons" field',
+                files: [
+                    { name: 'icon16.png',  type: 'png', size: 16 },
+                    { name: 'icon32.png',  type: 'png', size: 32 },
+                    { name: 'icon48.png',  type: 'png', size: 48 },
+                    { name: 'icon96.png',  type: 'png', size: 96 },
+                    { name: 'icon128.png', type: 'png', size: 128 },
+                ]
+            },
+            unity: {
+                label: 'Unity — Project Settings > Player > Icon; place in Assets/Icons/',
+                files: [
+                    { name: 'icon_1024.png', type: 'png', size: 1024 },
+                    { name: 'icon_512.png',  type: 'png', size: 512 },
+                    { name: 'icon_256.png',  type: 'png', size: 256 },
+                    { name: 'icon_128.png',  type: 'png', size: 128 },
+                    { name: 'icon_64.png',   type: 'png', size: 64 },
+                    { name: 'icon_48.png',   type: 'png', size: 48 },
+                    { name: 'icon_32.png',   type: 'png', size: 32 },
+                    { name: 'icon_16.png',   type: 'png', size: 16 },
+                    { name: 'icon.ico',      type: 'ico' },
+                    { name: 'icon.icns',     type: 'icns' },
+                ]
+            },
+            godot: {
+                label: 'Godot — Project > Project Settings > Application > Boot Splash / Icon',
+                files: [
+                    { name: 'icon.png',      type: 'png', size: 256 },
+                    { name: 'icon_128.png',  type: 'png', size: 128 },
+                    { name: 'icon_64.png',   type: 'png', size: 64 },
+                    { name: 'icon.ico',      type: 'ico' },
+                    { name: 'icon.icns',     type: 'icns' },
+                ]
+            },
+            unreal: {
+                label: 'Unreal Engine — Project Settings > Platforms; place in /Build/ directories',
+                files: [
+                    { name: 'Icon1024.png',  type: 'png', size: 1024 },
+                    { name: 'Icon512.png',   type: 'png', size: 512 },
+                    { name: 'Icon256.png',   type: 'png', size: 256 },
+                    { name: 'Icon128.png',   type: 'png', size: 128 },
+                    { name: 'Icon64.png',    type: 'png', size: 64 },
+                    { name: 'Icon32.png',    type: 'png', size: 32 },
+                    { name: 'icon.ico',      type: 'ico' },
+                    { name: 'icon.icns',     type: 'icns' },
+                ]
+            },
+        };
+
+        // ── State ────────────────────────────────────────────────────────────
+
+        let svgData = null;
+        let currentFiles = PLATFORMS['web'].files;
+
+        // ── DOM ──────────────────────────────────────────────────────────────
+
+        const uploadZone    = document.getElementById('uploadZone');
+        const fileInput     = document.getElementById('fileInput');
+        const previewSection = document.getElementById('previewSection');
+        const previewGrid   = document.getElementById('previewGrid');
+        const clearBtn      = document.getElementById('clearBtn');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        const progressBar   = document.getElementById('progressBar');
+        const progressFill  = document.getElementById('progressFill');
+        const iconCount     = document.getElementById('iconCount');
+        const svgCodeInput  = document.getElementById('svgCodeInput');
+        const processSvgBtn = document.getElementById('processSvgBtn');
+        const platformSelect = document.getElementById('platformSelect');
+        const platformMeta  = document.getElementById('platformMeta');
+
+        // ── Platform selector ────────────────────────────────────────────────
+
+        function updatePlatform() {
+            const key = platformSelect.value;
+            const p = PLATFORMS[key];
+            currentFiles = p.files;
+            platformMeta.innerHTML = `<strong>${key}</strong> &nbsp;·&nbsp; ${p.label} &nbsp;·&nbsp; <strong>${p.files.length} files</strong>`;
+            if (svgData) generatePreviews();
+        }
+
+        platformSelect.addEventListener('change', updatePlatform);
+        updatePlatform(); // init
+
+        // ── Upload / paste ───────────────────────────────────────────────────
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('drop', e => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', e => { if (e.target.files.length > 0) handleFile(e.target.files[0]); });
+
+        clearBtn.addEventListener('click', () => {
+            svgData = null;
+            previewSection.classList.remove('active');
+            fileInput.value = '';
+            svgCodeInput.value = '';
+        });
+
+        processSvgBtn.addEventListener('click', () => {
+            const code = svgCodeInput.value.trim();
+            if (!code || !code.includes('<svg')) { alert('Please paste valid SVG code containing <svg>'); return; }
+            handleSvgCode(code);
+        });
+
+        downloadAllBtn.addEventListener('click', generateZip);
+
+        async function handleSvgCode(code) {
+            startProgress();
+            svgData = code;
+            await generatePreviews();
+            endProgress();
+        }
+
+        function handleFile(file) {
+            if (!file.type.includes('svg') && !file.name.endsWith('.svg')) { alert('Please upload an SVG file'); return; }
+            startProgress();
+            const reader = new FileReader();
+            reader.onload = async e => { svgData = e.target.result; await generatePreviews(); endProgress(); };
+            reader.readAsText(file);
+        }
+
+        // ── Preview generation ───────────────────────────────────────────────
+
+        async function generatePreviews() {
+            previewGrid.innerHTML = '';
+            iconCount.textContent = `${currentFiles.length} files`;
+
+            for (const file of currentFiles) {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'preview-image-container';
+
+                if (file.type === 'png') {
+                    const img = document.createElement('img');
+                    img.src = await svgToDataURL(svgData, Math.min(file.size, 128));
+                    imgContainer.appendChild(img);
+                } else {
+                    const icon = document.createElement('div');
+                    icon.className = 'file-icon';
+                    icon.textContent = file.type === 'ico' ? '🪟' : '🍎';
+                    imgContainer.appendChild(icon);
+                }
+
+                const label = document.createElement('div');
+                label.className = 'size-label';
+                label.textContent = file.name;
+
+                const btn = document.createElement('button');
+                btn.textContent = 'Download';
+                btn.onclick = () => downloadSingleFile(file, btn);
+
+                item.appendChild(imgContainer);
+                item.appendChild(label);
+                item.appendChild(btn);
+                previewGrid.appendChild(item);
+            }
+
+            previewSection.classList.add('active');
+        }
+
+        async function downloadSingleFile(fileObj, btnEl) {
+            btnEl.textContent = 'Generating…';
+            btnEl.disabled = true;
+            try {
+                const blob = await generateBlob(fileObj);
+                triggerDownload(blob, fileObj.name.split('/').pop());
+            } catch (e) {
+                console.error(e);
+                alert('Error generating file');
+            } finally {
+                btnEl.textContent = 'Download';
+                btnEl.disabled = false;
+            }
+        }
+
+        // ── ZIP ──────────────────────────────────────────────────────────────
+
+        async function generateZip() {
+            const zip = new JSZip();
+            startProgress();
+            const inc = 100 / currentFiles.length;
+            let progress = 0;
+            for (const file of currentFiles) {
+                zip.file(file.name, await generateBlob(file));
+                progress += inc;
+                progressFill.style.width = `${progress}%`;
+            }
+            const content = await zip.generateAsync({ type: 'blob' });
+            triggerDownload(content, `icons-${platformSelect.value}.zip`);
+            endProgress();
+        }
+
+        // ── Generators ───────────────────────────────────────────────────────
+
+        async function generateBlob(file) {
+            if (file.type === 'png')  return pngBlob(svgData, file.size);
+            if (file.type === 'ico')  return generateIcoBlob(svgData);
+            if (file.type === 'icns') return generateIcnsBlob(svgData);
+        }
+
+        function pngBlob(svgString, size) {
+            return new Promise(resolve => {
+                const canvas = document.createElement('canvas');
+                canvas.width = canvas.height = size;
+                const img = new Image();
+                const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                img.onload = () => {
+                    canvas.getContext('2d').drawImage(img, 0, 0, size, size);
+                    canvas.toBlob(b => { URL.revokeObjectURL(url); resolve(b); }, 'image/png');
+                };
+                img.src = url;
+            });
+        }
+
+        function svgToDataURL(svgString, size) {
+            return new Promise(resolve => {
+                const canvas = document.createElement('canvas');
+                canvas.width = canvas.height = size;
+                const img = new Image();
+                const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                img.onload = () => {
+                    canvas.getContext('2d').drawImage(img, 0, 0, size, size);
+                    resolve(canvas.toDataURL('image/png'));
+                    URL.revokeObjectURL(url);
+                };
+                img.src = url;
+            });
+        }
+
+        async function generateIcoBlob(svgString) {
+            const sizes = [16, 32, 48, 64, 128, 256];
+            const images = [];
+            for (const size of sizes) {
+                const b = await pngBlob(svgString, size);
+                images.push({ size, data: new Uint8Array(await b.arrayBuffer()) });
+            }
+            const headerLen = 6, entryLen = 16;
+            const dirLen = headerLen + entryLen * images.length;
+            let totalLen = dirLen;
+            images.forEach(i => totalLen += i.data.length);
+            const buffer = new ArrayBuffer(totalLen);
+            const view = new DataView(buffer);
+            const bytes = new Uint8Array(buffer);
+            view.setUint16(0, 0, true); view.setUint16(2, 1, true); view.setUint16(4, images.length, true);
+            let offset = dirLen, eoff = 6;
+            images.forEach(img => {
+                const w = img.size >= 256 ? 0 : img.size;
+                view.setUint8(eoff, w); view.setUint8(eoff+1, w);
+                view.setUint8(eoff+2, 0); view.setUint8(eoff+3, 0);
+                view.setUint16(eoff+4, 1, true); view.setUint16(eoff+6, 32, true);
+                view.setUint32(eoff+8, img.data.length, true);
+                view.setUint32(eoff+12, offset, true);
+                bytes.set(img.data, offset);
+                eoff += 16; offset += img.data.length;
+            });
+            return new Blob([buffer], { type: 'image/x-icon' });
+        }
+
+        async function generateIcnsBlob(svgString) {
+            const types = [
+                { type: 'icp4', size: 16 }, { type: 'icp5', size: 32 }, { type: 'icp6', size: 64 },
+                { type: 'ic07', size: 128 }, { type: 'ic08', size: 256 }, { type: 'ic09', size: 512 }, { type: 'ic10', size: 1024 },
+            ];
+            const chunks = [];
+            let totalLen = 8;
+            for (const t of types) {
+                const b = await pngBlob(svgString, t.size);
+                const data = new Uint8Array(await b.arrayBuffer());
+                const chunkLen = 8 + data.length;
+                chunks.push({ type: t.type, len: chunkLen, data });
+                totalLen += chunkLen;
+            }
+            const buffer = new ArrayBuffer(totalLen);
+            const view = new DataView(buffer);
+            const bytes = new Uint8Array(buffer);
+            bytes.set([0x69, 0x63, 0x6e, 0x73], 0);
+            view.setUint32(4, totalLen, false);
+            let offset = 8;
+            for (const chunk of chunks) {
+                for (let i = 0; i < 4; i++) bytes[offset+i] = chunk.type.charCodeAt(i);
+                view.setUint32(offset+4, chunk.len, false);
+                bytes.set(chunk.data, offset+8);
+                offset += chunk.len;
+            }
+            return new Blob([buffer], { type: 'image/x-icns' });
+        }
+
+        // ── Helpers ──────────────────────────────────────────────────────────
+
+        function triggerDownload(blob, filename) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(link.href), 100);
+        }
+
+        function startProgress() { progressBar.classList.add('active'); progressFill.style.width = '20%'; }
+        function endProgress() {
+            progressFill.style.width = '100%';
+            setTimeout(() => { progressBar.classList.remove('active'); progressFill.style.width = '0%'; }, 500);
+        }
+    </script>
+</body>
+</html>
