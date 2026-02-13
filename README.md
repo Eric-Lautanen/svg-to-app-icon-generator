@@ -58,7 +58,7 @@ This tool generates the exact folder structures and file names required by:
 ## 🚀 How to use
 
 Since this is a single-file application, you don't need Node.js or a local server.
-1. Download the `svgconverter.html` file.
+1. Download the `index.html` file.
 2. Open it in any modern web browser.
 3. Paste your SVG code or upload your file.
 4. Select your target platform and click **Generate**.
