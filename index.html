@@ -470,6 +470,7 @@
                 <div class="platform-select-wrap">
                     <select id="platformSelect">
                         <optgroup label="── Desktop Frameworks ──">
+                            <option value="rust_egui">Rust/egui (Cross-platform)</option>
                             <option value="tauri">Tauri (Rust)</option>
                             <option value="electron">Electron.js</option>
                             <option value="neutralino">Neutralino.js</option>
@@ -558,6 +559,9 @@
             <button class="btn-zip" id="downloadAllBtn">
                 <span>⬇</span><span>Download All as ZIP</span>
             </button>
+            <div style="margin-top: 16px; padding: 12px 16px; background: #2a2a30; border-left: 3px solid #ff4757; border-radius: 4px; font-size: 0.8rem; color: #e8e8ec; line-height: 1.6;">
+                <strong style="color: #ff4757;">⚠ Windows 11 Users:</strong> If ZIP extraction fails with ICO files, use <a href="https://www.7-zip.org/" target="_blank" style="color: #00e5ff; text-decoration: none;">7-Zip</a> (free) or download files individually above.
+            </div>
         </div>
 
     </div>
@@ -584,6 +588,25 @@
 
         const PLATFORMS = {
             // --- Desktop & Cross-Platform Frameworks ---
+            rust_egui: {
+                label: 'Rust/egui — cross-platform icons for Windows, macOS, Linux',
+                files: [
+                    // Windows: icon.ico with multi-resolution support
+                    { name: 'assets/icon.ico', type: 'ico' },
+                    
+                    // macOS: icon.icns for app bundles
+                    { name: 'assets/icon.icns', type: 'icns' },
+                    
+                    // Linux: freedesktop.org standard icon sizes
+                    { name: 'assets/linux/icon-16.png',  type: 'png', size: 16 },
+                    { name: 'assets/linux/icon-32.png',  type: 'png', size: 32 },
+                    { name: 'assets/linux/icon-48.png',  type: 'png', size: 48 },
+                    { name: 'assets/linux/icon-64.png',  type: 'png', size: 64 },
+                    { name: 'assets/linux/icon-128.png', type: 'png', size: 128 },
+                    { name: 'assets/linux/icon-256.png', type: 'png', size: 256 },
+                    { name: 'assets/linux/icon-512.png', type: 'png', size: 512 },
+                ]
+            },
             tauri: {
                 label: 'Tauri — place files in src-tauri/icons/',
                 files: [
@@ -1137,18 +1160,35 @@
         // ── ZIP ──────────────────────────────────────────────────────────────
 
         async function generateZip() {
-            const zip = new JSZip();
-            startProgress();
-            const inc = 100 / currentFiles.length;
-            let progress = 0;
-            for (const file of currentFiles) {
-                zip.file(file.name, await generateBlob(file));
-                progress += inc;
-                progressFill.style.width = `${progress}%`;
+            try {
+                const zip = new JSZip();
+                startProgress();
+                const inc = 100 / currentFiles.length;
+                let progress = 0;
+                
+                for (const file of currentFiles) {
+                    const blob = await generateBlob(file);
+                    // Don't convert to ArrayBuffer - pass Blob directly
+                    // JSZip handles Blobs correctly without binary flag
+                    zip.file(file.name, blob);
+                    
+                    progress += inc;
+                    progressFill.style.width = `${progress}%`;
+                }
+                
+                const content = await zip.generateAsync({ 
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
+                });
+                
+                triggerDownload(content, `icons-${platformSelect.value}.zip`);
+                endProgress();
+            } catch (error) {
+                console.error('ZIP generation failed:', error);
+                alert('Failed to create ZIP file: ' + error.message);
+                endProgress();
             }
-            const content = await zip.generateAsync({ type: 'blob' });
-            triggerDownload(content, `icons-${platformSelect.value}.zip`);
-            endProgress();
         }
 
         // ── Generators ───────────────────────────────────────────────────────
@@ -1160,16 +1200,40 @@
         }
 
         function pngBlob(svgString, size) {
-            return new Promise(resolve => {
+            return new Promise((resolve, reject) => {
                 const canvas = document.createElement('canvas');
                 canvas.width = canvas.height = size;
+                const ctx = canvas.getContext('2d', { alpha: true });
+                
+                // Clear with transparent background
+                ctx.clearRect(0, 0, size, size);
+                
                 const img = new Image();
                 const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
+                
                 img.onload = () => {
-                    canvas.getContext('2d').drawImage(img, 0, 0, size, size);
-                    canvas.toBlob(b => { URL.revokeObjectURL(url); resolve(b); }, 'image/png');
+                    try {
+                        ctx.drawImage(img, 0, 0, size, size);
+                        canvas.toBlob(b => { 
+                            URL.revokeObjectURL(url);
+                            if (b) {
+                                resolve(b);
+                            } else {
+                                reject(new Error(`Failed to generate PNG blob for size ${size}`));
+                            }
+                        }, 'image/png', 1.0);
+                    } catch (error) {
+                        URL.revokeObjectURL(url);
+                        reject(error);
+                    }
                 };
+                
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    reject(new Error(`Failed to load SVG for size ${size}`));
+                };
+                
                 img.src = url;
             });
         }
@@ -1193,30 +1257,68 @@
         async function generateIcoBlob(svgString) {
             const sizes = [16, 32, 48, 64, 128, 256];
             const images = [];
+            
+            // Generate all PNG images first
             for (const size of sizes) {
-                const b = await pngBlob(svgString, size);
-                images.push({ size, data: new Uint8Array(await b.arrayBuffer()) });
+                try {
+                    const png = await pngBlob(svgString, size);
+                    const arrayBuffer = await png.arrayBuffer();
+                    const data = new Uint8Array(arrayBuffer);
+                    
+                    // Validate PNG header
+                    if (data[0] !== 0x89 || data[1] !== 0x50 || data[2] !== 0x4E || data[3] !== 0x47) {
+                        throw new Error(`Invalid PNG generated for size ${size}`);
+                    }
+                    
+                    images.push({ size, data });
+                } catch (error) {
+                    console.error(`Failed to generate ${size}x${size} icon:`, error);
+                    throw error;
+                }
             }
-            const headerLen = 6, entryLen = 16;
-            const dirLen = headerLen + entryLen * images.length;
-            let totalLen = dirLen;
-            images.forEach(i => totalLen += i.data.length);
-            const buffer = new ArrayBuffer(totalLen);
+            
+            // Calculate total size
+            const ICON_DIR_HEADER_SIZE = 6;
+            const ICON_DIR_ENTRY_SIZE = 16;
+            const headerSize = ICON_DIR_HEADER_SIZE + (ICON_DIR_ENTRY_SIZE * images.length);
+            let totalSize = headerSize;
+            images.forEach(img => totalSize += img.data.length);
+            
+            // Create ICO file buffer
+            const buffer = new ArrayBuffer(totalSize);
             const view = new DataView(buffer);
             const bytes = new Uint8Array(buffer);
-            view.setUint16(0, 0, true); view.setUint16(2, 1, true); view.setUint16(4, images.length, true);
-            let offset = dirLen, eoff = 6;
-            images.forEach(img => {
-                const w = img.size >= 256 ? 0 : img.size;
-                view.setUint8(eoff, w); view.setUint8(eoff+1, w);
-                view.setUint8(eoff+2, 0); view.setUint8(eoff+3, 0);
-                view.setUint16(eoff+4, 1, true); view.setUint16(eoff+6, 32, true);
-                view.setUint32(eoff+8, img.data.length, true);
-                view.setUint32(eoff+12, offset, true);
-                bytes.set(img.data, offset);
-                eoff += 16; offset += img.data.length;
+            
+            // Write ICONDIR header
+            view.setUint16(0, 0, true);                    // Reserved (must be 0)
+            view.setUint16(2, 1, true);                    // Type (1 = ICO)
+            view.setUint16(4, images.length, true);        // Number of images
+            
+            // Write ICONDIRENTRY for each image and image data
+            let imageDataOffset = headerSize;
+            let entryOffset = 6;
+            
+            images.forEach((img, index) => {
+                const width = img.size >= 256 ? 0 : img.size;   // 0 means 256
+                const height = img.size >= 256 ? 0 : img.size;
+                
+                view.setUint8(entryOffset + 0, width);          // Width
+                view.setUint8(entryOffset + 1, height);         // Height
+                view.setUint8(entryOffset + 2, 0);              // Color palette (0 = no palette)
+                view.setUint8(entryOffset + 3, 0);              // Reserved
+                view.setUint16(entryOffset + 4, 1, true);       // Color planes
+                view.setUint16(entryOffset + 6, 32, true);      // Bits per pixel
+                view.setUint32(entryOffset + 8, img.data.length, true);    // Image size in bytes
+                view.setUint32(entryOffset + 12, imageDataOffset, true);   // Image data offset
+                
+                // Copy image data
+                bytes.set(img.data, imageDataOffset);
+                
+                imageDataOffset += img.data.length;
+                entryOffset += ICON_DIR_ENTRY_SIZE;
             });
-            return new Blob([buffer], { type: 'image/x-icon' });
+            
+            return new Blob([buffer], { type: 'image/vnd.microsoft.icon' });
         }
 
         async function generateIcnsBlob(svgString) {
@@ -1252,12 +1354,18 @@
 
         function triggerDownload(blob, filename) {
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
+            link.href = url;
             link.download = filename;
+            link.style.display = 'none';
             document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            setTimeout(() => URL.revokeObjectURL(link.href), 100);
+            
+            // Small delay to ensure blob is ready
+            setTimeout(() => {
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 500);
+            }, 10);
         }
 
         function startProgress() { progressBar.classList.add('active'); progressFill.style.width = '20%'; }
