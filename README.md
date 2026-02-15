@@ -1,10 +1,11 @@
 # SVG to App Icon Generator 🎨
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Web](https://img.shields.io/badge/Platform-Web%20%7C%20PWA-blue)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
 [![Privacy: Local](https://img.shields.io/badge/Privacy-100%25%20Client--Side-green)]()
 
-**The fastest way to generate multi-platform app icons without leaving your browser.** ### 🚀 [Launch Live Demo](https://eric-lautanen.github.io/svg-to-app-icon-generator/)
+**The fastest way to generate multi-platform app icons without leaving your browser.**
+
+### 🚀 [Launch Live Demo](https://eric-lautanen.github.io/svg-to-app-icon-generator/)
 
 ---
 
@@ -13,6 +14,7 @@ A powerful, **single-file** tool to instantly convert SVG files into perfectly s
 ## ✨ Why use this converter?
 
 Most icon generators require you to upload your files to a server, process them slowly, or pay for premium formats. 
+
 **SVG to App Icon Generator** runs entirely in your browser. 
 
 * **🔒 100% Private:** Your SVG never leaves your device. No server uploads.
@@ -25,6 +27,7 @@ Most icon generators require you to upload your files to a server, process them 
 This tool generates the exact folder structures and file names required by:
 
 ### 🖥️ Desktop Frameworks
+* **Rust/egui:** Complete cross-platform icon set including `.ico` (Windows), `.icns` (macOS), and Linux PNG icons in proper `assets/` structure.
 * **Tauri (Rust):** Full `src-tauri/icons/` suite including `.icns`, `.ico`, and PNGs.
 * **Electron.js:** Standard `build/` or `assets/` directory icons.
 * **Wails (Go):** Specialized `appicon.png` and desktop formats.
@@ -58,16 +61,29 @@ This tool generates the exact folder structures and file names required by:
 ## 🚀 How to use
 
 Since this is a single-file application, you don't need Node.js or a local server.
+
 1. Download the `index.html` file.
 2. Open it in any modern web browser.
 3. Paste your SVG code or upload your file.
 4. Select your target platform and click **Generate**.
 
+### ⚠️ Windows 11 ZIP Extraction Note
+
+If you're on **Windows 11** and encounter issues extracting ZIP files containing `.ico` files:
+
+* **Recommended:** Use [7-Zip](https://www.7-zip.org/) (free) for extraction - it handles all formats perfectly
+* **Alternative:** Download files individually using the Download button next to each file
+* **Why?** Windows 11's built-in ZIP extractor has a known bug with ICO files from browser-generated ZIPs
+
+The generated ZIP files are perfectly valid and work on all other platforms and third-party extraction tools.
+
 ## 🛠️ Tech Stack
+
 * **HTML5/CSS3:** Responsive dark-mode UI with Syne & JetBrains Mono fonts.
 * **JSZip:** Handles client-side ZIP generation and folder structuring.
 * **Canvas API:** High-fidelity image rendering and resizing.
 * **Blob API:** Client-side binary file generation for `.ico` and `.icns`.
 
 ## 📄 License
+
 MIT License. Free to use for personal and commercial projects.
