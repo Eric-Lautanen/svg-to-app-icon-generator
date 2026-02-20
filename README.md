@@ -1,5 +1,4 @@
 # SVG to App Icon Generator 🎨
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Web](https://img.shields.io/badge/Platform-Web%20%7C%20PWA-blue)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
 [![Privacy: Local](https://img.shields.io/badge/Privacy-100%25%20Client--Side-green)]()
 
